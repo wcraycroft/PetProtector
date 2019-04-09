@@ -1,13 +1,11 @@
 package edu.miracostacollege.cs134.petprotector;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -37,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         petImageView.setImageURI(getUriToResource(this, R.drawable.none));
     }
 
+    // Helper method which returns the passed resource id as a URI String
     private static Uri getUriToResource(Context context, int id) {
         Resources res = context.getResources();
         String uri = ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         int permReqCode = 100;
 
-        permsList = getPermsList(requiredPerms);
+        permsList = getDeniedPermsList(requiredPerms);
 
         // Ask user for for permissions
         if (permsList.size() > 0) {
@@ -83,8 +82,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Override onActivityResult to find out what user picked
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -95,16 +92,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private List<String> getPermsList(List<String> requiredPermissions) {
+    // Helper method which check if all permissions in the passed list are allow and returns a list
+    // of permissions that are not.
+    private List<String> getDeniedPermsList(List<String> requiredPermissions) {
 
         List<String> permsList = new ArrayList<>();
-        int i = 0;
-        while (requiredPermissions.size() > 0) {
-            String perm = requiredPermissions.remove(i++);
+        // Loop through all required permissions
+        for (int i = 0; i < requiredPermissions.size(); i++) {
+            String perm = requiredPermissions.get(i);
+            // This does NOT ask the user for permissions
             int hasPerm = ContextCompat.checkSelfPermission(this, perm);
+            // If permission is denied, add it to denied list
             if (hasPerm == PackageManager.PERMISSION_DENIED)
                 permsList.add(perm);
         }
+        // Return denied permissions list
         return permsList;
     }
 
