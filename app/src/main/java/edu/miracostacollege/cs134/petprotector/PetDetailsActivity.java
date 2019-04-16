@@ -16,8 +16,6 @@ import edu.miracostacollege.cs134.petprotector.Model.Pet;
 
 public class PetDetailsActivity extends AppCompatActivity {
 
-    private static final String TAG = PetDetailsActivity.class.getSimpleName();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

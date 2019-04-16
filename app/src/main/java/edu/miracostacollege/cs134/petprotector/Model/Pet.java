@@ -11,6 +11,9 @@ import android.os.Parcelable;
  */
 public class Pet implements Parcelable {
 
+    // Constants
+    private static String defaultImageURI =
+            "android.resource://edu.miracostacollege.cs134.petprotector/drawable/none";
     //Member variables
     private long mId;
     private String mName;
@@ -19,27 +22,29 @@ public class Pet implements Parcelable {
     private String mImageURI;
 
     /**
-     * Creates a default <code>Pet</code> with an id of -1, empty description,
-     * empty phone number and default image name of none.png.
+     * Creates a default <code>Pet</code> with an id of -1, empty name, description,
+     * phone number and default image.
      */
     public Pet()
     {
-        this(-1, "", "", "", "android.resource://edu.miracostacollege.cs134.petprotector/drawable/none");
+        this(-1, "", "", "", defaultImageURI);
     }
 
     /**
-     * Creates a new <code>Pet</code> from its id, description and status.
+     * Creates a new <code>Pet</code> from its name, description and phone number, with default image.
+     * @param name The pet's name
      * @param description The pet description
-     * @param phone The pet phone (out of 5.0)
+     * @param phone The phone number associated with the pet
      */
     public Pet(String name, String description, String phone) {
-        this(-1, name, description, phone, "none.png");
+        this(-1, name, description, phone, defaultImageURI);
     }
 
     /**
      * Creates a new <code>Pet</code> from its id, description and status.
+     * @param name The pet's name
      * @param description The pet description
-     * @param phone The pet phone (out of 5.0)
+     * @param phone The phone number associated with the pet
      * @param imageURI The image file name of the pet
      */
     public Pet(String name, String description, String phone, String imageURI) {
@@ -50,7 +55,7 @@ public class Pet implements Parcelable {
      * Creates a new <code>Pet</code> from its id, description and status.
      * @param id The pet id
      * @param description The pet description
-     * @param phone The pet phone (out of 5.0)
+     * @param phone The phone number associated with the pet
      * @param imageURI The image file name of the pet
      */
     public Pet(long id, String name, String description, String phone, String imageURI) {
@@ -79,7 +84,7 @@ public class Pet implements Parcelable {
 
     /**
      * Gets the name of the <code>Pet</code>.
-     * @return The pet name
+     * @return The pet's name
      */
     public String getName() {
         return mName;
@@ -111,31 +116,31 @@ public class Pet implements Parcelable {
 
     /**
      * Gets the phone number for the <code>Pet</code>.
-     * @return The phone number for the pet.
+     * @return The phone number associated with the pet
      */
     public String getPhone() {
         return mPhone;
     }
 
     /**
-     * Sets the phone of the <code>Pet</code>.
-     * @param phone The phone (number of stars) of the pet.
+     * Sets the phone number for the <code>Pet</code>.
+     * @param phone The phone number associated with the pet
      */
     public void setPhone(String phone) {
         mPhone = phone;
     }
 
     /**
-     * Gets the image file name of the <code>Pet</code>.
-     * @return The image file name (e.g. lol.png) of the pet.
+     * Gets the image file URI of the <code>Pet</code>.
+     * @return The image file URI of the pet.
      */
     public String getImageURI() {
         return mImageURI;
     }
 
     /**
-     * Sets the image file name of the <code>Pet</code>.
-     * @param imageURI The image file name (e.g. lol.png) of the pet.
+     * Sets the image file URI of the <code>Pet</code>.
+     * @param imageURI The image file URI of the pet.
      */
     public void setImageURI(String imageURI) {
         mImageURI = imageURI;
@@ -144,8 +149,8 @@ public class Pet implements Parcelable {
     /**
      * A method for displaying a <code>Pet</code> as a String in the form:
      *
-     * Pet{id=1, Name=League of Legends, Description=Multiplayer online battle arena pet,
-     * Rating=4.5, ImageName=lol.png}
+     * Pet{id=1, Name=Fido, Description=Chases his tail, Phone=5554420093,
+     * ImageURI=android.resource://edu.miracostacollege.cs134.petprotector/drawable/fido}
      *
      * @return The formatted String
      */
@@ -155,8 +160,8 @@ public class Pet implements Parcelable {
                 "Id=" + mId +
                 ", Name='" + mName + '\'' +
                 ", Description='" + mDescription + '\'' +
-                ", Rating=" + mPhone +
-                ", ImageName='" + mImageURI + '\'' +
+                ", Phone=" + mPhone +
+                ", ImageURI='" + mImageURI + '\'' +
                 '}';
     }
 
