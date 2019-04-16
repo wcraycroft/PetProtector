@@ -13,26 +13,50 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import edu.miracostacollege.cs134.petprotector.Model.DBHelper;
+import edu.miracostacollege.cs134.petprotector.Model.Pet;
 
-    public static final int RESULT_LOAD_IMAGE = 200;
+public class PetListActivity extends AppCompatActivity {
 
+    public static final int RESULT_LOAD_IMAGE = -1;
+
+    public static final String TAG = PetListActivity.class.getSimpleName();
+    private Uri defaultImageURI;
+    private DBHelper db;
+    private List<Pet> petList;
+    private PetListAdapter petListAdapter;
+    private ListView petListView;
     private ImageView petImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_pet_list);
+
+        defaultImageURI = getUriToResource(this, R.drawable.none);
 
         petImageView = findViewById(R.id.petImageView);
-        petImageView.setImageURI(getUriToResource(this, R.drawable.none));
+        petImageView.setImageURI(defaultImageURI);
+        petImageView.setTag(defaultImageURI);
+        db = new DBHelper(this);
+
+
+        petList = db.getAllPets();
+        petListAdapter = new PetListAdapter(this, R.layout.pet_list_item, petList);
+
+        petListView = findViewById(R.id.petListView);
+        petListView.setAdapter(petListAdapter);
     }
 
     // Helper method which returns the passed resource id as a URI String
@@ -42,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
                 + res.getResourcePackageName(id) + "/"
                 + res.getResourceTypeName(id) + "/"
                 + res.getResourceEntryName(id);
+
+        //Log.i(PetListActivity.TAG, uri);
 
         return Uri.parse(uri);
     }
@@ -86,9 +112,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //Log.i(TAG, "After super call. Result code: " + resultCode);
         if (resultCode == RESULT_LOAD_IMAGE) {
             Uri uri = data.getData();
             petImageView.setImageURI(uri);
+            Log.i(TAG, "Attempted to set image to URI: " + uri.toString());
+            petImageView.setTag(uri);
         }
     }
 
@@ -108,6 +137,56 @@ public class MainActivity extends AppCompatActivity {
         }
         // Return denied permissions list
         return permsList;
+    }
+
+    public void viewPetDetails(View view) {
+        Pet selectedPet = (Pet) view.getTag();
+
+        Intent detailsIntent = new Intent(this, PetDetailsActivity.class);
+        detailsIntent.putExtra("Selected Pet", selectedPet);
+
+        startActivity(detailsIntent);
+    }
+
+    public void addPet(View view)
+    {
+        //db.deleteAllPets();
+
+        EditText nameEditText = findViewById(R.id.nameEditText);
+        EditText descriptionEditText = findViewById(R.id.descriptionEditText);
+        EditText phoneNumberEditText = findViewById(R.id.phoneNumberEditText);
+
+        String name = nameEditText.getText().toString();
+        String description = descriptionEditText.getText().toString();
+        String phoneNumber = phoneNumberEditText.getText().toString();
+        String uri = petImageView.getTag().toString();
+
+        if (TextUtils.isEmpty(name))
+        {
+            Toast.makeText(this, "Name of the pet must be provided.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (TextUtils.isEmpty(description))
+        {
+            Toast.makeText(this, "Details for the pet must be provided.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if ( TextUtils.isEmpty(phoneNumber))
+        {
+            Toast.makeText(this, "Phone number for the pet must be provided.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Pet newPet = new Pet(name, description, phoneNumber, uri);
+
+        // Add the new pet to the database to ensure it is persisted.
+        db.addPet(newPet);
+        petListAdapter.add(newPet);
+        // Clear all the entries (reset them)
+        nameEditText.setText("");
+        descriptionEditText.setText("");
+        phoneNumberEditText.setText("");
+        petImageView.setImageURI(defaultImageURI);
+        petImageView.setTag(defaultImageURI);
     }
 
 
