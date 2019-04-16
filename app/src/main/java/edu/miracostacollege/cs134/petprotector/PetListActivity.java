@@ -27,6 +27,13 @@ import java.util.List;
 import edu.miracostacollege.cs134.petprotector.Model.DBHelper;
 import edu.miracostacollege.cs134.petprotector.Model.Pet;
 
+/**
+ * This controller class handles the behavior of the Pet List Activity, which allows a user to add
+ * a pet to the database. It also allows the user to select an image from external storage.
+ *
+ * @author William Craycroft
+ * @version 1.0
+ */
 public class PetListActivity extends AppCompatActivity {
 
     public static final int RESULT_LOAD_IMAGE = -1;
@@ -39,6 +46,11 @@ public class PetListActivity extends AppCompatActivity {
     private ListView petListView;
     private ImageView petImageView;
 
+    /**
+     * Inflates the activity_pet_list layout, links views, and get pet information from database.
+     *
+     * @param savedInstanceState - Bundle of data saved from previous state (unused)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
