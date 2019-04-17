@@ -9,13 +9,19 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class helps create and maintain a database of Pets, storing their name, description,
+ * phone number and image URI.
+ *
+ * @author William Craycroft
+ * @version 1.0
+ */
 public class DBHelper extends SQLiteOpenHelper {
 
     // Database name, Table name and version
     public static final String DATABASE_NAME = "PetProtector";
     private static final String DATABASE_TABLE = "Pets";
     private static final int DATABASE_VERSION = 1;
-
 
     // Field names
     private static final String KEY_FIELD_ID = "_id";
@@ -24,11 +30,18 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String FIELD_PHONE_NUMBER = "phone_number";
     private static final String FIELD_IMAGE_NAME = "image_name";
 
-    // Constructor
+    /**
+     * Creates a new DBHelper given its context.
+     * @param context - The calling activity
+     */
     public DBHelper(Context context){
         super (context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Creates a new Database if one does not currently exist.
+     * @param database - the SQLiteDatabase object
+     */
     @Override
     public void onCreate (SQLiteDatabase database){
         String table = "CREATE TABLE IF NOT EXISTS " + DATABASE_TABLE + "("
@@ -40,6 +53,12 @@ public class DBHelper extends SQLiteOpenHelper {
         database.execSQL (table);
     }
 
+    /**
+     * Upgradres the database to a newer version. Drops and recreates the table.
+     * @param database - reference to the SQLiteDatabase object
+     * @param oldVersion - the old version ID
+     * @param newVersion - the new version ID
+     */
     @Override
     public void onUpgrade(SQLiteDatabase database,
                           int oldVersion,
@@ -48,34 +67,34 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(database);
     }
 
-    //********** DATABASE OPERATIONS:  ADD, UPDATE, EDIT, DELETE
-
+    /**
+     * Adds a new Pet to the database and updates its id in the model.
+     * @param pet - the Pet object to be added
+     */
     public void addPet(Pet pet) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        //ADD KEY-VALUE PAIR INFORMATION FOR THE PET NAME
+        // Add key-value pairs for each member variable
         values.put(FIELD_NAME, pet.getName());
-
-        //ADD KEY-VALUE PAIR INFORMATION FOR THE PET DESCRIPTION
-        values.put(FIELD_DESCRIPTION, pet.getDescription());
-
-        //ADD KEY-VALUE PAIR INFORMATION FOR THE PET RATING
+        values.put(FIELD_DESCRIPTION, pet.getDetails());
         values.put(FIELD_PHONE_NUMBER, pet.getPhone());
-
-        //ADD KEY-VALUE PAIR INFORMATION FOR THE PET RATING
         values.put(FIELD_IMAGE_NAME, pet.getImageURI());
 
-        // INSERT THE ROW IN THE TABLE
+        // Insert new row
         long id = db.insert(DATABASE_TABLE, null, values);
 
-        // UPDATE THE PET WITH THE NEWLY ASSIGNED ID FROM THE DATABASE
+        // Set the pet id to the assigned primary key.
         pet.setId(id);
 
-        // CLOSE THE DATABASE CONNECTION
+        // Close database
         db.close();
     }
 
+    /**
+     * Returns a list of all Pets currently in the database
+     * @return List of all pets
+     */
     public List<Pet> getAllPets() {
         List<Pet> petList = new ArrayList<>();
         SQLiteDatabase database = getReadableDatabase();
@@ -87,7 +106,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 null,
                 null, null, null, null );
 
-        //COLLECT EACH ROW IN THE TABLE
+        // Loop through table, add new Pet object to list
         if (cursor.moveToFirst()){
             do {
                 Pet pet =
@@ -99,65 +118,21 @@ public class DBHelper extends SQLiteOpenHelper {
                 petList.add(pet);
             } while (cursor.moveToNext());
         }
+        // Close DB
         cursor.close();
         database.close();
+        // Return list
         return petList;
     }
 
-    public void deletePet(Pet pet){
-        SQLiteDatabase db = getWritableDatabase();
-
-        // DELETE THE TABLE ROW
-        db.delete(DATABASE_TABLE, KEY_FIELD_ID + " = ?",
-                new String[] {String.valueOf(pet.getId())});
-        db.close();
-    }
-
+    /**
+     * Deletes all pets from the current database by deleting the current table (used for debugging)
+     */
     public void deleteAllPets()
     {
         SQLiteDatabase db = getWritableDatabase();
         db.delete(DATABASE_TABLE, null, null);
         db.close();
-    }
-
-    public void updatePet(Pet pet){
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-
-        values.put(FIELD_NAME, pet.getName());
-        values.put(FIELD_DESCRIPTION, pet.getDescription());
-        values.put(FIELD_PHONE_NUMBER, pet.getPhone());
-        values.put(FIELD_IMAGE_NAME, pet.getImageURI());
-
-        db.update(DATABASE_TABLE, values, KEY_FIELD_ID + " = ?",
-                new String[]{String.valueOf(pet.getId())});
-        db.close();
-    }
-
-    public Pet getPet(int id) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(
-                DATABASE_TABLE,
-                new String[]{KEY_FIELD_ID, FIELD_NAME, FIELD_DESCRIPTION, FIELD_PHONE_NUMBER, FIELD_IMAGE_NAME},
-                KEY_FIELD_ID + "=?",
-                new String[]{String.valueOf(id)},
-                null, null, null, null );
-
-        Pet pet = null;
-        if (cursor != null) {
-            cursor.moveToFirst();
-
-            pet = new Pet(
-                    cursor.getLong(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getString(3),
-                    cursor.getString(4));
-
-            cursor.close();
-        }
-        db.close();
-        return pet;
     }
 
 }

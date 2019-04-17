@@ -4,64 +4,43 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * The <code>Pet</code> class maintains information about a video pet,
- * including its id number, name, description, rating and image name.
+ * The <code>Pet</code> class holds information a pet up for adoption,
+ * including its id number, name, details, phone number and image URI.
  *
  * @author Will Craycroft
  */
 public class Pet implements Parcelable {
 
-    // Constants
-    private static String defaultImageURI =
-            "android.resource://edu.miracostacollege.cs134.petprotector/drawable/none";
     //Member variables
     private long mId;
     private String mName;
-    private String mDescription;
+    private String mDetails;
     private String mPhone;
     private String mImageURI;
 
     /**
-     * Creates a default <code>Pet</code> with an id of -1, empty name, description,
-     * phone number and default image.
-     */
-    public Pet()
-    {
-        this(-1, "", "", "", defaultImageURI);
-    }
-
-    /**
-     * Creates a new <code>Pet</code> from its name, description and phone number, with default image.
+     * Creates a new <code>Pet</code> from its name, details, phone number and image URI.
      * @param name The pet's name
-     * @param description The pet description
+     * @param details The pet details
      * @param phone The phone number associated with the pet
+     * @param imageURI The image file URI for the pet
      */
-    public Pet(String name, String description, String phone) {
-        this(-1, name, description, phone, defaultImageURI);
+    public Pet(String name, String details, String phone, String imageURI) {
+        this(-1, name, details, phone, imageURI);
     }
 
     /**
-     * Creates a new <code>Pet</code> from its id, description and status.
-     * @param name The pet's name
-     * @param description The pet description
-     * @param phone The phone number associated with the pet
-     * @param imageURI The image file name of the pet
-     */
-    public Pet(String name, String description, String phone, String imageURI) {
-        this(-1, name, description, phone, imageURI);
-    }
-
-    /**
-     * Creates a new <code>Pet</code> from its id, description and status.
+     * Creates a new <code>Pet</code> from its id, name, details, phone number and image URI.
      * @param id The pet id
-     * @param description The pet description
+     * @param name The pet's name
+     * @param details The pet details
      * @param phone The phone number associated with the pet
-     * @param imageURI The image file name of the pet
+     * @param imageURI The image file URI for the pet
      */
-    public Pet(long id, String name, String description, String phone, String imageURI) {
+    public Pet(long id, String name, String details, String phone, String imageURI) {
         mId = id;
         mName = name;
-        mDescription = description;
+        mDetails = details;
         mPhone = phone;
         mImageURI = imageURI;
     }
@@ -99,19 +78,19 @@ public class Pet implements Parcelable {
     }
 
     /**
-     * Gets the description of the <code>Pet</code>.
-     * @return The pet's description
+     * Gets the details of the <code>Pet</code>.
+     * @return The pet's details
      */
-    public String getDescription () {
-        return mDescription;
+    public String getDetails() {
+        return mDetails;
     }
 
     /**
-     * Sets the description of the <code>Pet</code>.
-     * @param desc The pet's description
+     * Sets the details of the <code>Pet</code>.
+     * @param details The pet's details
      */
-    public void setDescription (String desc) {
-        mDescription = desc;
+    public void setDetails(String details) {
+        mDetails = details;
     }
 
     /**
@@ -149,7 +128,7 @@ public class Pet implements Parcelable {
     /**
      * A method for displaying a <code>Pet</code> as a String in the form:
      *
-     * Pet{id=1, Name=Fido, Description=Chases his tail, Phone=5554420093,
+     * Pet{id=1, Name=Fido, Details=Chases his tail, Phone=5554420093,
      * ImageURI=android.resource://edu.miracostacollege.cs134.petprotector/drawable/fido}
      *
      * @return The formatted String
@@ -159,7 +138,7 @@ public class Pet implements Parcelable {
         return "Pet{" +
                 "Id=" + mId +
                 ", Name='" + mName + '\'' +
-                ", Description='" + mDescription + '\'' +
+                ", Details='" + mDetails + '\'' +
                 ", Phone=" + mPhone +
                 ", ImageURI='" + mImageURI + '\'' +
                 '}';
@@ -174,29 +153,41 @@ public class Pet implements Parcelable {
         return 0;
     }
 
+    /**
+     * Writes the current Pet object into a passed Parcel object
+     *
+     * @param dest - the Parcel object to be written to
+     * @param flags
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
 
         dest.writeLong(mId);
         dest.writeString(mName);
-        dest.writeString(mDescription);
+        dest.writeString(mDetails);
         dest.writeString(mPhone);
         dest.writeString(mImageURI);
 
     }
 
-    // Mechanism to create a new Pet object from a Parcel
-    // Private constructor to create a new Pet from Parcel
+    /**
+     * Creates a new <code>Pet</code> from a passed Parcel object
+     *
+     * @param parcel - Parcel containing Pet data
+     */
     private Pet(Parcel parcel)
     {
         mId = parcel.readLong();
         mName = parcel.readString();
-        mDescription = parcel.readString();
+        mDetails = parcel.readString();
         mPhone = parcel.readString();
         mImageURI = parcel.readString();
 
     }
 
+    /**
+     * Overrides Parcelable.Creator so that it calls the parcel constructor of this class
+     */
     public static final Parcelable.Creator<Pet> CREATOR = new Creator<Pet>() {
         @Override
         public Pet createFromParcel(Parcel source) {

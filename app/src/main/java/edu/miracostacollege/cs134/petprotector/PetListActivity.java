@@ -36,15 +36,20 @@ import edu.miracostacollege.cs134.petprotector.Model.Pet;
  */
 public class PetListActivity extends AppCompatActivity {
 
+    // Constants
     public static final int RESULT_LOAD_IMAGE = -1;
-
     public static final String TAG = PetListActivity.class.getSimpleName();
+    // Declarations
     private Uri defaultImageURI;
     private DBHelper db;
     private List<Pet> petList;
     private PetListAdapter petListAdapter;
+    // View objects
     private ListView petListView;
     private ImageView petImageView;
+    EditText nameEditText;
+    EditText descriptionEditText;
+    EditText phoneNumberEditText;
 
     /**
      * Inflates the activity_pet_list layout, links views, and get pet information from database.
@@ -58,20 +63,31 @@ public class PetListActivity extends AppCompatActivity {
 
         defaultImageURI = getUriToResource(this, R.drawable.none);
 
+        // Link views
         petImageView = findViewById(R.id.petImageView);
         petImageView.setImageURI(defaultImageURI);
         petImageView.setTag(defaultImageURI);
+        nameEditText = findViewById(R.id.nameEditText);
+        descriptionEditText = findViewById(R.id.descriptionEditText);
+        phoneNumberEditText = findViewById(R.id.phoneNumberEditText);
+        petListView = findViewById(R.id.petListView);
+
+        // Instantiate Database
         db = new DBHelper(this);
 
-
+        // Load initial Pets from database, create new ListAdapter and link it
         petList = db.getAllPets();
         petListAdapter = new PetListAdapter(this, R.layout.pet_list_item, petList);
-
-        petListView = findViewById(R.id.petListView);
         petListView.setAdapter(petListAdapter);
     }
 
-    // Helper method which returns the passed resource id as a URI String
+    /**
+     * Helper method which returns the passed resource id as a URI object
+     *
+     * @param context - The context linked to the resource
+     * @param id - The id of the target resource
+     * @return The formatted Uri object pointing to the resource
+     */
     private static Uri getUriToResource(Context context, int id) {
         Resources res = context.getResources();
         String uri = ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
@@ -79,11 +95,15 @@ public class PetListActivity extends AppCompatActivity {
                 + res.getResourceTypeName(id) + "/"
                 + res.getResourceEntryName(id);
 
-        //Log.i(PetListActivity.TAG, uri);
-
         return Uri.parse(uri);
     }
 
+    /**
+     * Prompts the user for any missing permissions (Camera, storage). Then, opens the gallery
+     * to retrieve an image resource.
+     *
+     * @param v - Reference to the calling ImageView object
+     */
     public void selectPetImage(View v) {
         // Make a list (empty) of permissions
         // As user grants them, add each permission to the list
@@ -119,12 +139,17 @@ public class PetListActivity extends AppCompatActivity {
 
     }
 
-    // Override onActivityResult to find out what user picked
+    /**
+     * Override onActivityResult to find out what the user picked
+     *
+     * @param requestCode - the request code indicating the call type
+     * @param resultCode - the code indicating a successful load
+     * @param data - the intent containing the loaded image
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        //Log.i(TAG, "After super call. Result code: " + resultCode);
         if (resultCode == RESULT_LOAD_IMAGE) {
             Uri uri = data.getData();
             petImageView.setImageURI(uri);
@@ -133,8 +158,13 @@ public class PetListActivity extends AppCompatActivity {
         }
     }
 
-    // Helper method which check if all permissions in the passed list are allow and returns a list
-    // of permissions that are not.
+    /**
+     * Helper method which check if all permissions in the passed list are allow and returns a list
+     * of permissions that are not.
+     *
+     * @param requiredPermissions - the list of required permissions for this app
+     * @return The list of denied permissions after prompting the user
+     */
     private List<String> getDeniedPermsList(List<String> requiredPermissions) {
 
         List<String> permsList = new ArrayList<>();
@@ -151,28 +181,35 @@ public class PetListActivity extends AppCompatActivity {
         return permsList;
     }
 
+    /**
+     * After the user clicks a pet in the list, get the Pet object from the list item tag,
+     * save that Pet information as a parcelable object and send it to a new PetDetailsActivity.
+     *
+     * @param view - Reference to the calling Button object
+     */
     public void viewPetDetails(View view) {
+        // Get Pet object sent in list item object's tag property
         Pet selectedPet = (Pet) view.getTag();
-
+        // Instantiate details intent
         Intent detailsIntent = new Intent(this, PetDetailsActivity.class);
         detailsIntent.putExtra("Selected Pet", selectedPet);
-
+        // Launch activity
         startActivity(detailsIntent);
     }
 
+    /**
+     * Validates EditText input, adds the new Pet to the database, and updates the Pet List
+     * @param view - Reference to the calling Button object
+     */
     public void addPet(View view)
     {
-        //db.deleteAllPets();
-
-        EditText nameEditText = findViewById(R.id.nameEditText);
-        EditText descriptionEditText = findViewById(R.id.descriptionEditText);
-        EditText phoneNumberEditText = findViewById(R.id.phoneNumberEditText);
-
+        // Store input from EditTexts
         String name = nameEditText.getText().toString();
         String description = descriptionEditText.getText().toString();
         String phoneNumber = phoneNumberEditText.getText().toString();
         String uri = petImageView.getTag().toString();
 
+        // Check if any fields are empty, show error Toast and return if they are.
         if (TextUtils.isEmpty(name))
         {
             Toast.makeText(this, "Name of the pet must be provided.", Toast.LENGTH_LONG).show();
@@ -188,15 +225,18 @@ public class PetListActivity extends AppCompatActivity {
             Toast.makeText(this, "Phone number for the pet must be provided.", Toast.LENGTH_LONG).show();
             return;
         }
+        // Create new Pet object from inputs
         Pet newPet = new Pet(name, description, phoneNumber, uri);
 
         // Add the new pet to the database to ensure it is persisted.
         db.addPet(newPet);
+        // Update List
         petListAdapter.add(newPet);
-        // Clear all the entries (reset them)
+        // Clear all EditText views
         nameEditText.setText("");
         descriptionEditText.setText("");
         phoneNumberEditText.setText("");
+        // Reset pet image
         petImageView.setImageURI(defaultImageURI);
         petImageView.setTag(defaultImageURI);
     }
